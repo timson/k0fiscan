@@ -26,9 +26,12 @@ use std::collections::HashMap;
 pub struct ServiceEntry {
     pub name: &'static str,
     pub comment: &'static str,
+    pub prb: f32,
 }
 
-pub fn get_services() -> HashMap<u16, ServiceEntry> {
+pub type ServiceMap = HashMap<u16, ServiceEntry>;
+
+pub fn get_services() -> ServiceMap {
     HashMap::from([
 $entries
     ])
@@ -41,13 +44,14 @@ $entries
 class ServiceEntry:
     name: str
     port: int
+    prb: float
     comment: str = ""
 
 
 def format_entry(s: ServiceEntry) -> str:
     name = s.name.replace('"', '\\"')
     comment = s.comment.replace('"', '\\"')
-    return f'        ({s.port}, ServiceEntry {{ name: "{name}", comment: "{comment}" }}),'
+    return f'        ({s.port}, ServiceEntry {{ name: "{name}", comment: "{comment}", prb: {s.prb} }}),'
 
 
 def generate_rust_file(services: list[ServiceEntry]) -> str:
@@ -79,17 +83,18 @@ def read_services(infile: Path) -> list[ServiceEntry]:
         tokens = line.split("\t", maxsplit=3)
         comment = ""
         if len(tokens) == 4:
-            service_name, port, _, comment = tokens
+            service_name, port, prb, comment = tokens
         elif len(tokens) == 3:
-            service_name, port, _ = tokens
+            service_name, port, prb = tokens
         else:
             raise ValueError("unknown line format")
 
+        prb = float(prb)
         port_num, proto = parse_port(port)
         if proto != Protocol.TCP or service_name == "unknown":
             continue
         comment = strip_comment(comment)
-        services.append(ServiceEntry(name=service_name, port=port_num, comment=comment))
+        services.append(ServiceEntry(name=service_name, port=port_num, comment=comment, prb=prb))
     return services
 
 

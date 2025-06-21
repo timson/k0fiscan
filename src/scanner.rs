@@ -11,7 +11,7 @@ use tokio::{
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_util::sync::CancellationToken;
 
-use crate::services::{get_services, ServiceEntry};
+use crate::services::{ServiceEntry};
 
 const MAX_COMMIT_LEN: usize = 60;
 
@@ -58,24 +58,25 @@ async fn scan_one(
 
 pub async fn scan_ips(
     ips: Vec<IpAddr>,
-    range: (u16, u16),
+    port_range: Vec<u16>,
     per_port: Duration,
     max_concurrency: usize,
     pb: ProgressBar,
+    services: Arc<HashMap<u16, ServiceEntry>>,
     token: CancellationToken,
 ) -> Vec<ScanPair> {
-    let services = Arc::new(get_services());
 
     let (tx, rx) = mpsc::channel::<(IpAddr, u16)>(max_concurrency * 2);
+    let port_range_clone = port_range.clone();
     tokio::spawn({
         let token = token.clone();
         async move {
             for ip in ips {
-                for port in range.0..=range.1 {
+                for port in &port_range_clone {
                     if token.is_cancelled() {
                         return;
                     }
-                    if tx.send((ip, port)).await.is_err() {
+                    if tx.send((ip, *port)).await.is_err() {
                         return;
                     }
                 }

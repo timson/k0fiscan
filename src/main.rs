@@ -1,8 +1,12 @@
 use clap::{value_parser, ArgGroup, Parser, ValueEnum};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use ipnet::IpNet;
-use k0fiscan::{ports::parse_port, scanner::scan_ips};
-use std::{net::IpAddr, time::Duration};
+use k0fiscan::{
+    ports::{get_top_ports, parse_port},
+    scanner::scan_ips,
+    services::get_services,
+};
+use std::{net::IpAddr, time::Duration, sync::Arc};
 use tabled::{settings::Style, Table};
 use tokio_util::sync::CancellationToken;
 
@@ -36,8 +40,11 @@ struct Args {
     #[arg(short = 'e', long, requires = "start_ip")]
     end_ip: Option<IpAddr>,
 
-    #[arg(short, long, default_value = "1:65535")]
-    port_range: String,
+    #[arg(short, long)]
+    port_range: Option<String>,
+
+    #[arg(short = 'x', long, default_value_t = 10.0)]
+    top_ports: f32,
 
     #[arg(short = 'l', long = "list", value_parser = value_parser!(IpAddr), value_delimiter = ',')]
     ip_list: Option<Vec<IpAddr>>,
@@ -77,7 +84,12 @@ fn ips_between(start: IpAddr, end: IpAddr) -> Vec<IpAddr> {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    let ports = parse_port(&args.port_range).expect("msg");
+    let srv_map = get_services();
+    let ports: Vec<u16> = if let Some(port_range) = args.port_range {
+        parse_port(&port_range).expect("msg")
+    } else {
+        get_top_ports(&srv_map, args.top_ports)
+    };
 
     let ips: Vec<IpAddr> = if let Some(target) = args.target {
         vec![target]
@@ -113,7 +125,7 @@ async fn main() {
     spinner.set_message("☕ Scanning started... brewing ports");
     spinner.enable_steady_tick(Duration::from_millis(100));
 
-    let total = ips.len() * ((ports.1 - ports.0 + 1) as usize);
+    let total = ips.len() * ports.len();
     let pb = multi.add(ProgressBar::new(total as u64));
     pb.set_style(
         ProgressStyle::default_bar()
@@ -128,6 +140,7 @@ async fn main() {
         Duration::from_millis(300),
         args.max_tasks,
         pb,
+        Arc::new(srv_map),
         cancel.clone(),
     )
     .await;

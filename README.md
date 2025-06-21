@@ -11,7 +11,7 @@ k0fi --network 192.168.1.0/24 --port-range 22:443 --max-tasks 800
 ## Features/Limitations
 - **IPv4 / IPv6** support
 - TCP only
-- nmap-services included
+- nmap-services included + port statistics for fast scan
 - CIDR, single host, custom IP ranges, IP(s) list
 - Concurrency limiter (`--max-tasks`)
 - Output as **table** or **JSON** (`--output table|json`)
@@ -34,6 +34,9 @@ k0fi --network 172.16.0.0/24 --port-range 1:1024
 
 # scan an IP range
 k0fi --start-ip 10.1.1.10 --end-ip 10.1.1.20 --output json
+
+# scan an IP list with 30% of top ports according port statistic from nmap-services
+kofi --list 192.168.2.1,192.168.2.2 -x 30
 ````
 
 ## License

@@ -19340,7 +19340,7 @@ unknown	32385/udp	0.001961
 unknown	32389/udp	0.000654
 unknown	32391/udp	0.000654
 unknown	32398/udp	0.000654
-plex	32400/tcp	0.000000	# Plex multimedia
+plex	32400/tcp	0.010000	# Plex multimedia
 unknown	32404/udp	0.001307
 unknown	32406/udp	0.000654
 unknown	32409/udp	0.000654
