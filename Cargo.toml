@@ -1,0 +1,28 @@
+[package]
+name = "k0fiscan"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.40", features = ["derive"] }
+futures = "0.3.31"
+indicatif = "0.17.11"
+ipnet = "2.11.0"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+tabled = { version = "0.14", features = ["derive"] }
+tokio = { version = "1.45.1", features = [
+    "macros",
+    "rt-multi-thread",
+    "net",
+    "time",
+    "sync",
+    "signal",
+] }
+tokio-stream = "0.1.17"
+tokio-util = "0.7.15"
+
+
+[[bin]]
+name = "k0fi"
+path = "src/main.rs"
