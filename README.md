@@ -36,7 +36,7 @@ k0fi --network 172.16.0.0/24 --port-range 1:1024
 k0fi --start-ip 10.1.1.10 --end-ip 10.1.1.20 --output json
 
 # scan an IP list with 30% of top ports according port statistic from nmap-services
-kofi --list 192.168.2.1,192.168.2.2 -x 30
+k0fi --list 192.168.2.1,192.168.2.2 -x 30
 ````
 
 ## License
