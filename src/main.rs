@@ -43,8 +43,9 @@ struct Args {
     #[arg(short, long)]
     port_range: Option<String>,
 
-    #[arg(short = 'x', long, default_value_t = 10.0)]
-    top_ports: f32,
+    #[arg(short = 'x', long, default_value_t = 10, value_parser = value_parser!(u8).range(0..100),
+        help = "percentage 0-100")]
+    top_ports: u8,
 
     #[arg(short = 'l', long = "list", value_parser = value_parser!(IpAddr), value_delimiter = ',')]
     ip_list: Option<Vec<IpAddr>>,
@@ -88,7 +89,7 @@ async fn main() {
     let ports: Vec<u16> = if let Some(port_range) = args.port_range {
         parse_port(&port_range).expect("msg")
     } else {
-        get_top_ports(&srv_map, args.top_ports)
+        get_top_ports(&srv_map, args.top_ports as f32)
     };
 
     let ips: Vec<IpAddr> = if let Some(target) = args.target {
