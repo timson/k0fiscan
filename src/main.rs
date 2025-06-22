@@ -6,7 +6,8 @@ use k0fiscan::{
     scanner::scan_ips,
     services::get_services,
 };
-use std::{net::IpAddr, time::Duration, sync::Arc};
+use std::{net::IpAddr, time::Duration, sync::Arc, io};
+use std::io::Write;
 use tabled::{settings::Style, Table};
 use tokio_util::sync::CancellationToken;
 
@@ -152,10 +153,22 @@ async fn main() {
         OutputFormat::Table => {
             let mut table = Table::new(open_ports);
             table.with(Style::modern());
-            println!("{table}");
+            if let Err(e) = writeln!(io::stdout(), "{table}") {
+                if e.kind() != io::ErrorKind::BrokenPipe {
+                    eprintln!("Error writing table: {e}");
+                }
+                std::process::exit(0);
+            }
         }
         OutputFormat::Json => {
-            println!("{}", serde_json::to_string_pretty(&open_ports).unwrap());
+            let json = serde_json::to_string_pretty(&open_ports).unwrap();
+            if let Err(e) = writeln!(io::stdout(), "{}", json) {
+                if e.kind() != io::ErrorKind::BrokenPipe {
+                    eprintln!("Error writing JSON: {e}");
+                }
+                std::process::exit(0);
+            }
         }
     }
+
 }
