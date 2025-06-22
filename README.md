@@ -17,7 +17,18 @@ k0fi --network 192.168.1.0/24 --port-range 22:443 --max-tasks 800
 - Output as **table** or **JSON** (`--output table|json`)
 - Graceful _Ctrl+C_ — stops immediately and prints partial results
 
-## Build
+## Install
+
+To install k0fiscan, run the following command:
+
+```bash
+curl -sSL https://timson.github.io/k0fiscan/install.sh | bash
+```
+
+
+## Build from source
+
+Clone the repository and build it:
 
 ```bash
 cargo build --release
@@ -38,6 +49,28 @@ k0fi --start-ip 10.1.1.10 --end-ip 10.1.1.20 --output json
 # scan an IP list with 30% of top ports according port statistic from nmap-services
 k0fi --list 192.168.2.1,192.168.2.2 -x 30
 ````
+You can combine json output with using **jq** tool, it may be useful for further processing.
+
+Some examples:
+
+Gives you the number of open ports
+
+```bash
+k0fi -n 192.168.2.0/24 -m 2000 -o json | jq 'length'
+```
+Gives you the number of unique IPs with open ports
+```bash
+k0fi -n 192.168.2.0/24 -m 2000 -o json | jq '[.[] | .ip] | unique | length'
+```
+Shows you IPs with open ports and the number of ports
+```bash
+k0fi -n 192.168.2.0/24 -m 2000 -o json | jq 'group_by(.ip) | map({ip: .[0].ip, ports: length})'
+```
+
+Shows most common open ports in the network
+```bash
+k0fi -n 192.168.2.0/24 -m 2000 -o json | jq '[.[] | .port] | group_by(.) | map({port: .[0], count: length}) | sort_by(-.count)'
+```
 
 ## License
 k0fiscan is distributed under the **MIT License**.

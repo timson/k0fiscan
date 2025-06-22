@@ -6,8 +6,8 @@ use k0fiscan::{
     scanner::scan_ips,
     services::get_services,
 };
-use std::{net::IpAddr, time::Duration, sync::Arc, io};
 use std::io::Write;
+use std::{io, net::IpAddr, sync::Arc, time::Duration};
 use tabled::{settings::Style, Table};
 use tokio_util::sync::CancellationToken;
 
@@ -170,5 +170,4 @@ async fn main() {
             }
         }
     }
-
 }

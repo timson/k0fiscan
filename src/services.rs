@@ -1,4 +1,3 @@
-
 use std::collections::HashMap;
 
 pub struct ServiceEntry {
@@ -52,18 +51,9 @@ pub fn get_services() -> ServiceMap {
             Err(_) => continue,
         };
 
-        let comment = comment_part
-            .trim_start_matches('#')
-            .trim();
+        let comment = comment_part.trim_start_matches('#').trim();
 
-        map.insert(
-            port,
-            ServiceEntry {
-                name,
-                comment,
-                prb,
-            },
-        );
+        map.insert(port, ServiceEntry { name, comment, prb });
     }
 
     map
